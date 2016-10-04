@@ -1,4 +1,4 @@
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  1
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -16,65 +16,254 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00009 
                       00810         LIST
                       00002     LIST p=16f887
-                      00003 ; *** Configurazione microcontrollore ***
-2007   3FF4           00004     __CONFIG _CONFIG1, _INTRC_OSC_NOCLKOUT & _WDT_OFF
-                      00005 
-                      00006 RES_VECT    CODE    0x0000            ; processor reset vector
-0000   2???           00007     GOTO START                   ; go to beginning of program
-                      00008   
-                      00009 INT_VECT    CODE    0x0004
-0004   2???           00010     GOTO IRQ
-                      00011     
-                      00012 ; *** Definizione variabili in memoria condivisa ***
-                      00013     UDATA_SHR
-                      00014 
-                      00015 MAIN_PROG CODE                      ; let linker place main program
-                      00016 
-0000                  00017 IRQ
-0000   0009           00018  retfie
-                      00019 
-0001                  00020 START
-                      00021 ; setup EUSART 
-0001   1683 1303      00022     BANKSEL TXSTA
+                      00003     
+                      00004 ; Configurazione microcontrollore
+                      00005 ;    __CONFIG _WDT_OFF
+                      00006 
+                      00007 RES_VECT CODE 0x0000            ; processor reset vector
+0000   2???           00008     GOTO START                  ; go to beginning of program
+                      00009   
+                      00010 INT_VECT CODE 0x0004
+0004   2???           00011     GOTO IRQ
+                      00012     
+                      00013 ; Definizione variabili in memoria condivisa
+                      00014 USER_VARIABLES  UDATA_SHR
+0000                  00015 ReadChar    RES 1
+0001                  00016 Temp        RES 1
+0002                  00017 Counter     RES 1
+                      00018             
+                      00019 MAIN_PROG CODE
+                      00020  
+0000                  00021 IRQ
+                      00022     ;Gestione interrupt da timer2
+0000   1283 1303      00023     banksel PIR1
+0002   1C8C           00024     btfss PIR1, TMR2IF
+0003   0009           00025     retfie
+                      00026     
+0004   1283 1303      00027     banksel PORTC
+0006   0987           00028     comf PORTC, 1
+0007   1283 1303      00029     banksel PIR1
+0009   108C           00030     bcf PIR1, TMR2IF
+000A   0009           00031     retfie
+                      00032     
+                      00033     
+                      00034     
+                      00035 ;Setup I/O e EUSART
+  0000                00036     global setup
+000B                  00037 setup
+                      00038     ;Imposta oscillatore interno a Fosc = 8 MHz
+000B   1683 1303      00039     banksel OSCCON
+000D   3075           00040     movlw 0x75
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0003   1218           00023     bcf TXSTA,SYNC              ;utilizza l'EUSART in modalità asincrona
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0004   1518           00024     bsf TXSTA,BRGH              ;BRGH 1 per avere un baudrate a 9600
-0005   1683 1703      00025     BANKSEL BAUDCTL
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0007   1187           00026     bcf BAUDCTL,BRG16           ;BRG16 0 per avere un baudrate a 9600
-0008   3019           00027     movlw D'25'                 ;scrive 25 in decimale nel registro W
-0009   1683 1303      00028     BANKSEL SPBRG
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000B   0099           00029     movwf SPBRG                 ;sposta il valore di W(25) nel registro SPBRG per impostare il baudrate 
-                            a 9600
-000C   1283 1303      00030     BANKSEL RCSTA
-000E   1618           00031     bsf RCSTA,CREN              ;abilita il circuito di ricezione
-000F   1798           00032     bsf RCSTA,SPEN              ;abilita la periferica
-                      00033 
-                      00034 ; abilita interrupt alla ricezione di dati
-0010   1683 1303      00035     BANKSEL PIE1
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0012   168C           00036     bsf PIE1,RCIE               ;abilita l'interrupt in ricezione
-0013   1283 1303      00037     BANKSEL INTCON
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  2
+000E   008F           00041     movwf OSCCON
+000F   1683 1303      00042     banksel OSCTUNE
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0015   170B           00038     bsf INTCON,PEIE             ;abilita l'interrupt della periferica
-0016   178B           00039     bsf INTCON,GIE              ;abilita gli interrupt generali
-                      00040     
-0017   0063           00041 sleep_pnt   SLEEP               ;punto di sleep
-                      00042     
-0018   1E8C           00043     BTFSS PIR1,RCIF             ;controlla se c'è qualcosa da leggere in seriale
-0019   2???           00044         goto sleep_pnt
-                      00045     ;INSERIRE QUI IN MEZZO LE OPERAZIONI DA FARE QUANDO SI RISVEGLIA DALLO SLEEP
-                      00046    
-001A   2???           00047     goto sleep_pnt
-3FF4                  00048     END
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  3
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0011   0190           00043     clrf OSCTUNE
+                      00044     
+                      00045     ;Imposta led D1,D2,D3,D4 come output
+0012   1283 1303      00046     banksel PORTD
+0014   3000           00047     movlw 0x00
+0015   0088           00048     movwf PORTD
+0016   1683 1303      00049     banksel TRISD
+0018   3000           00050     movlw 0x00
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0019   0088           00051     movwf TRISD
+                      00052     
+                      00053     ;Imposta pin buzzer come output
+001A   1683 1303      00054     banksel TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001C   1107           00055     bcf TRISC, RC2
+                      00056     
+                      00057     ;Setup Timer2
+001D   1283 1303      00058     banksel T2CON
+001F   3002           00059     movlw 0x02                  ;1/16 prescaler
+0020   0092           00060     movwf T2CON
+0021   1283 1303      00061     banksel TMR2
+0023   0191           00062     clrf TMR2                   ;azzera contatore
+0024   1683 1303      00063     banksel PR2
+0026   3083           00064     movlw 0x83
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0027   0092           00065     movwf PR2                   ;compara contatore con 142
+0028   1683 1303      00066     banksel PIE1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002A   148C           00067     bsf PIE1, TMR2IE            ;abilita interrupt 
+                      00068     
+                      00069     ;Setup EUSART
+002B   1683 1303      00070     banksel TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002D   1307           00071     bcf TRISC, RC6              ;Set TX pin come output
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002E   1787           00072     bsf TRISC, RC7              ;Set RX pin come input
+                      00073     
+002F   1683 1303      00074     banksel TXSTA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0031   1218           00075     bcf TXSTA,SYNC              ;utilizza EUSART in modalità asincrona
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0032   1518           00076     bsf TXSTA,BRGH              ;high baudrate
+0033   1683 1703      00077     banksel BAUDCTL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0035   1187           00078     bcf BAUDCTL,BRG16           ;registro baudrate a 8 bit
+0036   1683 1303      00079     banksel SPBRG
+0038   3033           00080     movlw D'51'                 ;Il valore di SPBRG è calcolato tramite la formula
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0039   0099           00081     movwf SPBRG                 ;SPBRG = Fosc/(16*baud) - 1
+                      00082     
+003A   1283 1303      00083     banksel RCSTA
+003C   1618           00084     bsf RCSTA,CREN              ;abilita il circuito di ricezione
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+003D   1798           00085     bsf RCSTA,SPEN              ;abilita la periferica
+                      00086     
+003E   1283 1303      00087     banksel INTCON
+0040   170B           00088     bsf INTCON,PEIE             ;abilita l'interrupt da periferica
+0041   178B           00089     bsf INTCON,GIE              ;abilita gli interrupt generali
+                      00090     
+0042   0008           00091     return
+                      00092     
+                      00093     
+                      00094     
+                      00095     
+                      00096     
+                      00097 ;Determina se il carattere in ReadChar è compreso tra ['0','9']
+                      00098 ;ritorna ReadChar = 0xFF se falso, ReadChar = (ASCII -> num) se vero
+  0000                00099     global is_digit
+0043                  00100 is_digit
+0043   3029           00101     movlw 0x29                  ;0x30 is '0' in ASCII
+0044   01??           00102     clrf Temp                   
+0045   02??           00103     subwf ReadChar, 0
+0046   0D??           00104     rlf Temp, 1                 ;memorizza il precedente carry
+0047   1C00           00105     btfss Temp, 0               ;se il carry è 1, il numero è >= '0'
+0048   2???           00106     goto not_a_digit
+                      00107     
+0049   3040           00108     movlw 0x40                  ;0x39 is '9' in ASCII
+004A   01??           00109     clrf Temp
+004B   02??           00110     subwf ReadChar, 0           
+004C   0D??           00111     rlf Temp, 1                 ;memorizza il precedente carry
+004D   1800           00112     btfsc Temp, 0               ;se il carry è 0, il numero è > '9'
+004E   2???           00113     goto not_a_digit
+                      00114 
+004F   3030           00115     movlw 0x30
+0050   02??           00116     subwf ReadChar, 1           ;sottrae '0' per ottenere la cifra intera
+0051   0008           00117     return
+                      00118     
+0052                  00119 not_a_digit
+0052   30FF           00120     movlw 0xFF
+0053   00??           00121     movwf ReadChar
+0054   0008           00122     return
+                      00123 
+                      00124 
+                      00125     
+                      00126 ;Genera un ritardo di tanti millisecondi quanto è il valore
+                      00127 ;di W al momento della chiamata. Funziona correttamente per Fosc 
+                      00128 ;pari a 8 Mhz
+  0000                00129     global delay_ms
+0055                  00130 delay_ms
+0055   00??           00131     movwf Temp                  
+0056                  00132 loop
+0056   0B??           00133     decfsz Temp, 1
+0057   2???           00134     goto inner_loop_init
+0058   0008           00135     return
+0059                  00136 inner_loop_init
+0059   30C8           00137     movlw 0xC8                      ;200
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+005A   00??           00138     movwf Counter
+005B                  00139 inner_loop
+005B   0B??           00140     decfsz Counter, 1
+005C   2???           00141     goto nops
+005D   2???           00142     goto loop
+005E                  00143 nops
+005E   0000           00144     nop
+005F   0000           00145     nop
+0060   0000           00146     nop
+0061   0000           00147     nop
+0062   0000           00148     nop
+0063   0000           00149     nop
+0064   2???           00150     goto inner_loop
+                      00151     
+                      00152     
+                      00153 ;Ciclo principale infinito
+  0000                00154     global main_loop
+0065                  00155 main_loop
+0065   1283 1303      00156     banksel PIR1
+0067   1E8C           00157     btfss PIR1, RCIF            ;Controlla se il buffer in lettura è pieno
+0068   2???           00158     goto main_loop              ;Ritorna al main_loop se il buffer è vuoto
+                      00159     
+0069   1283 1303      00160     banksel RCREG
+006B   081A           00161     movf RCREG, 0               ;Lettura EUSART rx buffer
+006C   00??           00162     movwf ReadChar              ;Copia in ReadChar
+                      00163     
+006D   2???           00164     call is_digit               ;Traduzione da ASCII a numero intero
+                      00165     
+006E   1B80           00166     btfsc ReadChar, 7           ;Continua se ReadChar è un numero tra [0,9]
+006F   2???           00167     goto main_loop
+                      00168     
+0070   1283 1303      00169     banksel PORTD
+0072   08??           00170     movfw ReadChar
+0073   0088           00171     movwf PORTD                 ;Mostra il numero sui led D1,D2,D3,D4
+                      00172     
+0074   1283 1303      00173     banksel RCSTA
+0076   1218           00174     bcf RCSTA,CREN              ;disablita ricezione EUSART
+                      00175     
+                      00176     
+0077   1283 1303      00177     banksel T2CON
+0079   0A??           00178     incf ReadChar, 1            ;Incrementa per compensare decfsz
+007A                  00179 beep_loop
+007A   0B??           00180     decfsz ReadChar, 1
+007B   2???           00181     goto beep_loop_begin
+007C   2???           00182     goto beep_loop_end
+                      00183     
+007D                  00184 beep_loop_begin
+007D   1512           00185     bsf T2CON, TMR2ON           ;abilita il timer
+                      00186     
+                      00187     ; Delay di un quarto secondo
+007E   30FA           00188     movlw 0xFA
+007F   2???           00189     call delay_ms
+                      00190     
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0080   1112           00191     bcf T2CON, TMR2ON           ;disabilita il timer
+                      00192     
+                      00193     ; Delay di un quarto secondo
+0081   30FA           00194     movlw 0xFA
+0082   2???           00195     call delay_ms
+                      00196     
+0083   2???           00197     goto beep_loop          
+                      00198     
+0084                  00199 beep_loop_end
+0084   1283 1303      00200     banksel RCSTA
+0086   1618           00201     bsf RCSTA,CREN              ;riablita ricezione EUSART
+                      00202     
+0087   2???           00203     goto main_loop          
+0088   0008           00204     return
+                      00205     
+                      00206     
+                      00207  
+                      00208     
+                      00209 ; Starting point
+0089                  00210 START
+0089   2???           00211     call setup
+008A   2???           00212     call main_loop
+                      00213     END
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  6
 
 
 SYMBOL TABLE
@@ -133,7 +322,7 @@ BRG6                              00000006
 BRG7                              00000007
 BRG8                              00000000
 BRG9                              00000001
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  4
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  7
 
 
 SYMBOL TABLE
@@ -192,7 +381,7 @@ CHS0                              00000002
 CHS1                              00000003
 CHS2                              00000004
 CHS3                              00000005
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  5
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  8
 
 
 SYMBOL TABLE
@@ -205,6 +394,7 @@ CM2CON0                           00000108
 CM2CON1                           00000109
 CREN                              00000004
 CSRC                              00000007
+Counter                           00000002
 D                                 00000005
 DATA_ADDRESS                      00000005
 DC                                00000001
@@ -250,13 +440,13 @@ INTEDG                            00000006
 INTF                              00000001
 IOCB                              00000096
 IOCB0                             00000000
-IOCB1                             00000001
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  6
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE  9
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+IOCB1                             00000001
 IOCB2                             00000002
 IOCB3                             00000003
 IOCB4                             00000004
@@ -309,13 +499,13 @@ PCLATH                            0000000A
 PCON                              0000008E
 PDC0                              00000000
 PDC1                              00000001
-PDC2                              00000002
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  7
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 10
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+PDC2                              00000002
 PDC3                              00000003
 PDC4                              00000004
 PDC5                              00000005
@@ -368,13 +558,13 @@ RC0                               00000000
 RC1                               00000001
 RC2                               00000002
 RC3                               00000003
-RC4                               00000004
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  8
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 11
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+RC4                               00000004
 RC5                               00000005
 RC6                               00000006
 RC7                               00000007
@@ -408,6 +598,7 @@ RX9                               00000006
 RX9D                              00000000
 R_NOT_W                           00000002
 R_W                               00000002
+ReadChar                          00000000
 S                                 00000003
 SBOREN                            00000004
 SCKP                              00000004
@@ -426,14 +617,14 @@ SSPADD                            00000093
 SSPBUF                            00000013
 SSPCON                            00000014
 SSPCON2                           00000091
-SSPEN                             00000005
-SSPIE                             00000003
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  9
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 12
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+SSPEN                             00000005
+SSPIE                             00000003
 SSPIF                             00000003
 SSPM0                             00000000
 SSPM1                             00000001
@@ -442,7 +633,7 @@ SSPM3                             00000003
 SSPMSK                            00000093
 SSPOV                             00000006
 SSPSTAT                           00000094
-START                             00000001
+START                             00000089
 STATUS                            00000003
 STRA                              00000000
 STRB                              00000001
@@ -485,14 +676,14 @@ TMR2ON                            00000002
 TOUTPS0                           00000003
 TOUTPS1                           00000004
 TOUTPS2                           00000005
-TOUTPS3                           00000006
-TRISA                             00000085
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 10
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 13
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+TOUTPS3                           00000006
+TRISA                             00000085
 TRISA0                            00000000
 TRISA1                            00000001
 TRISA2                            00000002
@@ -544,16 +735,17 @@ TX9                               00000006
 TX9D                              00000000
 TXD8                              00000000
 TXEN                              00000005
-TXIE                              00000004
-TXIF                              00000004
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 11
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 14
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+TXIE                              00000004
+TXIF                              00000004
 TXREG                             00000019
 TXSTA                             00000098
+Temp                              00000001
 UA                                00000001
 ULPWUE                            00000005
 ULPWUIE                           00000002
@@ -602,15 +794,15 @@ _BOR_NSLEEP                       00003EFF
 _BOR_OFF                          00003CFF
 _BOR_ON                           00003FFF
 _BOR_SBODEN                       00003DFF
-_CONFIG1                          00002007
-_CONFIG2                          00002008
-_CPD_OFF                          00003FFF
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 12
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 15
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+_CONFIG1                          00002007
+_CONFIG2                          00002008
+_CPD_OFF                          00003FFF
 _CPD_ON                           00003F7F
 _CP_OFF                           00003FFF
 _CP_ON                            00003FBF
@@ -660,16 +852,27 @@ _WRT_HALF                         000039FF
 _WRT_OFF                          00003FFF
 _XT_OSC                           00003FF9
 __16F887                          00000001
-sleep_pnt                         00000017
-
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 13
-
+beep_loop                         0000007A
+MPASM 5.68                          MAIN.ASM   10-4-2016  22:44:08         PAGE 16
 
 
+SYMBOL TABLE
+  LABEL                             VALUE 
 
+beep_loop_begin                   0000007D
+beep_loop_end                     00000084
+delay_ms                          00000055
+inner_loop                        0000005B
+inner_loop_init                   00000059
+is_digit                          00000043
+loop                              00000056
+main_loop                         00000065
+nops                              0000005E
+not_a_digit                       00000052
+setup                             0000000B
 
 Errors   :     0
 Warnings :     0 reported,     0 suppressed
-Messages :     5 reported,     0 suppressed
+Messages :    12 reported,     0 suppressed
 
 

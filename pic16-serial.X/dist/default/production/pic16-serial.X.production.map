@@ -1,0 +1,68 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Tue Oct 04 22:44:09 2016
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                 RES_VECT       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                 INT_VECT       code   0x000004    program   0x000002
+                MAIN_PROG       code   0x000005    program   0x000116
+           USER_VARIABLES      udata   0x000070       data   0x000003
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00008f      
+            143 out of 8455 program addresses used, program memory utilization is 1%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                      IRQ   0x000005    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                    START   0x00008e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                beep_loop   0x00007f    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+          beep_loop_begin   0x000082    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+            beep_loop_end   0x000089    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 delay_ms   0x00005a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+               inner_loop   0x000060    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+          inner_loop_init   0x00005e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 is_digit   0x000048    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     loop   0x00005b    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                main_loop   0x00006a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     nops   0x000063    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+              not_a_digit   0x000057    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                    setup   0x000010    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                  Counter   0x000072       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 ReadChar   0x000070       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     Temp   0x000071       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                      IRQ   0x000005    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                    setup   0x000010    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 is_digit   0x000048    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+              not_a_digit   0x000057    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 delay_ms   0x00005a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     loop   0x00005b    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+          inner_loop_init   0x00005e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+               inner_loop   0x000060    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     nops   0x000063    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                main_loop   0x00006a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                beep_loop   0x00007f    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+          beep_loop_begin   0x000082    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+            beep_loop_end   0x000089    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                    START   0x00008e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                 ReadChar   0x000070       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                     Temp   0x000071       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                  Counter   0x000072       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+
+
