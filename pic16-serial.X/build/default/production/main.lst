@@ -1,10 +1,20 @@
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  1
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00001 #include <p16f887.inc>
+                      00001 
+                      00002     
+                      00003 ;           DESCRIZIONE
+                      00004 ; Si realizzi un  firmware che riceve un carattere da porta seriale (EUSART) 
+                      00005 ; corrispondente ad una cifra da 0 a 9, 
+                      00006 ; quindi emette un suono con il buzzer 
+                      00007 ; della durata di n secondi (n = valore ricevuto). 
+                      00008 ; Se il carattere ricevuto non è nel range '1'..'9', 
+                      00009 ; il carattere deve essere ignorato.
+                      00010  
+                      00011 #include <p16f887.inc>
                       00001         LIST
                       00002 
                       00003 ;==========================================================================
@@ -15,66 +25,209 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00008 ;==========================================================================
                       00009 
                       00810         LIST
-                      00002     LIST p=16f887
-                      00003 ; *** Configurazione microcontrollore ***
-2007   3FF4           00004     __CONFIG _CONFIG1, _INTRC_OSC_NOCLKOUT & _WDT_OFF
-                      00005 
-                      00006 RES_VECT    CODE    0x0000            ; processor reset vector
-0000   2???           00007     GOTO START                   ; go to beginning of program
-                      00008   
-                      00009 INT_VECT    CODE    0x0004
-0004   2???           00010     GOTO IRQ
-                      00011     
-                      00012 ; *** Definizione variabili in memoria condivisa ***
-                      00013     UDATA_SHR
+                      00012 #include <macro.inc>
+                      00001 ; definizione di macro utili per ottenere un codice piu' compatto
+                      00002 ;
+                      00003 ; se si include questo file in MPLAB X, selezionare "exclude from build"
+                      00004 ;  dalle proprieta' del file (tasto destro sul file nella finestra
+                      00005 ;  del progetto)
+                      00006 
+                      00007 
+                      00008 ; macro per settare il valore di un registro (movlw + banksel + movwf)
+                      00009 setRegK                 macro Reg, Const
+                      00010                 movlw Const
+                      00011                 banksel Reg
+                      00012                 movwf Reg
+                      00013                                 endm
                       00014 
-                      00015 MAIN_PROG CODE                      ; let linker place main program
-                      00016 
-0000                  00017 IRQ
-0000   0009           00018  retfie
+                      00015 
+                      00016 ; macro per azzerare un registro (banksel + clrf)
+                      00017 setReg0                 macro Reg
+                      00018                 banksel Reg
+                      00019                 clrf Reg
+                      00020                                 endm
+                      00013     LIST p=16f887
+                      00014 ; *** Configurazione microcontrollore ***
+                      00015     ;clock interno, watchdog e low voltage programming disabilitati
+2007   2FF4           00016     __CONFIG _CONFIG1, _INTRC_OSC_NOCLKOUT & _WDT_OFF & _LVP_OFF
+                      00017     ;brown out reset impostato a 2.1v
+2008   3EFF           00018     __CONFIG _CONFIG2, _BOR21V
                       00019 
-0001                  00020 START
-                      00021 ; setup EUSART 
-0001   1683 1303      00022     BANKSEL TXSTA
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0003   1218           00023     bcf TXSTA,SYNC              ;utilizza l'EUSART in modalità asincrona
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0004   1518           00024     bsf TXSTA,BRGH              ;BRGH 1 per avere un baudrate a 9600
-0005   1683 1703      00025     BANKSEL BAUDCTL
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0007   1187           00026     bcf BAUDCTL,BRG16           ;BRG16 0 per avere un baudrate a 9600
-0008   3019           00027     movlw D'25'                 ;scrive 25 in decimale nel registro W
-0009   1683 1303      00028     BANKSEL SPBRG
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000B   0099           00029     movwf SPBRG                 ;sposta il valore di W(25) nel registro SPBRG per impostare il baudrate 
-                            a 9600
-000C   1283 1303      00030     BANKSEL RCSTA
-000E   1618           00031     bsf RCSTA,CREN              ;abilita il circuito di ricezione
-000F   1798           00032     bsf RCSTA,SPEN              ;abilita la periferica
-                      00033 
-                      00034 ; abilita interrupt alla ricezione di dati
-0010   1683 1303      00035     BANKSEL PIE1
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0012   168C           00036     bsf PIE1,RCIE               ;abilita l'interrupt in ricezione
-0013   1283 1303      00037     BANKSEL INTCON
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  2
+                      00020 res_vect    CODE    0x0000          ;vettore di reset
+0000   ???? ????      00021     pagesel start
+0002   2???           00022     GOTO start                      ;inizia il programma
+                      00023   
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0015   170B           00038     bsf INTCON,PEIE             ;abilita l'interrupt della periferica
-0016   178B           00039     bsf INTCON,GIE              ;abilita gli interrupt generali
-                      00040     
-0017   0063           00041 sleep_pnt   SLEEP               ;punto di sleep
-                      00042     
-0018   1E8C           00043     BTFSS PIR1,RCIF             ;controlla se c'è qualcosa da leggere in seriale
-0019   2???           00044         goto sleep_pnt
-                      00045     ;INSERIRE QUI IN MEZZO LE OPERAZIONI DA FARE QUANDO SI RISVEGLIA DALLO SLEEP
-                      00046    
-001A   2???           00047     goto sleep_pnt
-3FF4                  00048     END
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  3
+                      00024 t_vect    CODE    0x0004            ;vettore di interrupt
+0004   ???? ????      00025     pagesel irq
+0006   2???           00026     GOTO irq                        ;vai alla ruoutine
+                      00027     
+                      00028 ; *** Definizione variabili in memoria condivisa ***
+                      00029     UDATA_SHR
+0000                  00030 secondi RES 1                       ;secondi in cui il buzzer deve suonare
+                      00031     
+                      00032 main_prog CODE                      ; let linker place main program
+                      00033 
+0000                  00034 irq
+0000   0009           00035     retfie
+                      00036 
+0001                  00037 start
+                      00038     ; configura clock
+                      00039     setRegK OSCCON, B'01110001' ;oscillatore interno a 8 MHz
+0001   3071               M                 movlw B'01110001'
+0002   1683 1303          M                 banksel OSCCON
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0004   008F               M                 movwf OSCCON
+0005   2???           00040     call initHw
+                      00041     
+0006                  00042 loop
+0006   1283 1303      00043     banksel PORTD
+0008   1008           00044     bcf PORTD,0                 ;spengo il led 0
+0009   1283 1303      00045     banksel PIR1
+000B   1E8C           00046     btfss PIR1,RCIF
+000C   2???           00047         goto $-1                ;gira finche non c'è un carattere in seriale
+000D   1283 1303      00048     banksel PORTD
+000F   1408           00049     bsf PORTD,0                 ;accendo il led 0
+0010   1283 1303      00050     banksel RCREG
+0012   081A           00051     movf RCREG,w                ;sposto il carattere letto da seriale su W
+0013   00??           00052     movwf secondi               ;salvo W in memoria
+                      00053     
+                      00054     ;controlla se il carattere è maggiore di '0'
+0014   3030           00055     movlw '0'
+0015   02??           00056     subwf secondi,1
+0016   1D03           00057     btfss STATUS,Z
+0017   1C03           00058     btfss STATUS,C
+0018   2???           00059         goto loop               ;ignora se char era minore di '0'
+                      00060     
+                      00061     ;controlla se il carattere è minore o uguale di '9'
+0019   300A           00062     movlw .10
+001A   02??           00063     subwf secondi,w
+001B   1D03           00064     btfss STATUS,Z
+001C   1803           00065     btfsc STATUS,C
+001D   2???           00066         goto loop               ;ingora se char è maggiore di 9
+                      00067         
+                      00068     ;gira e suona finche ci sono secondi da scalare
+001E   2???           00069 suono call beep1s
+001F   0B??           00070     decfsz secondi,1            
+0020   2???           00071         goto suono
+                      00072     
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0021   2???           00073     goto loop
+                      00074 
+                      00075     
+0022                  00076 initHw
+                      00077     ; setup EUSART 
+0022   1683 1303      00078     banksel TXSTA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0024   1218           00079     bcf TXSTA,SYNC              ;utilizza l'EUSART in modalità asincrona
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0025   1518           00080     bsf TXSTA,BRGH              ;BRGH 1 per avere un baudrate a 19200
+0026   1683 1703      00081     banksel BAUDCTL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0028   1187           00082     bcf BAUDCTL,BRG16           ;BRG16 0 per avere un baudrate a 19200
+0029   3019           00083     movlw D'25'                 ;scrive 25 in decimale nel registro W
+002A   1683 1303      00084     banksel SPBRG
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002C   0099           00085     movwf SPBRG                 ;sposta il valore di W(25) nel registro SPBRG per impostare il baudrate 
+                            a 19200
+002D   1283 1303      00086     banksel RCSTA
+002F   1618           00087     bsf RCSTA,CREN              ;abilita il circuito di ricezione
+0030   1798           00088     bsf RCSTA,SPEN              ;abilita la periferica
+                      00089     
+                      00090     ; inzializzazione dei timer e della PWM
+                      00091 
+                      00092     ;timer1:
+                      00093     ; quarzo esterno (32768 Hz), prescaler = 1
+                      00094     ;  -> freq = 32768 Hz, tick ~= 30.518 us, max period = 2 s
+                      00095     setRegK T1CON, B'00001011'
+0031   300B               M                 movlw B'00001011'
+0032   1283 1303          M                 banksel T1CON
+0034   0090               M                 movwf T1CON
+                      00096     
+                      00097 
+                      00098     ; timer2 e CCP1: PWM a 800 Hz (T = 1250 us) per buzzer
+                      00099     ;  tmr2 prescaler = 16
+                      00100     ;   -> freq. = 125 kHz, tick = 8 us, max period = 2048 us
+                      00101     setRegK T2CON, B'00000011'    ; TMR2ON = 0 (PWM disabilitata)
+0035   3003               M                 movlw B'00000011'
+0036   1283 1303          M                 banksel T2CON
+0038   0092               M                 movwf T2CON
+                      00102     setRegK PR2, .156             ; T = 1250 us
+0039   309C               M                 movlw .156
+003A   1683 1303          M                 banksel PR2
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+003C   0092               M                 movwf PR2
+                      00103     setRegK CCPR1L, .78           ; duty cycle = 50%
+003D   304E               M                 movlw .78
+003E   1283 1303          M                 banksel CCPR1L
+0040   0095               M                 movwf CCPR1L
+                      00104     setRegK CCP1CON, B'00001100'  ; PWM mode
+0041   300C               M                 movlw B'00001100'
+0042   1283 1303          M                 banksel CCP1CON
+0044   0097               M                 movwf CCP1CON
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00105 
+                      00106     ;port C:
+                      00107     ; RC2: digital output for buzzer
+0045   1683 1303      00108     banksel TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0047   1107           00109     bcf TRISC,2
+                      00110                 
+                      00111     ;port D:
+                      00112     ; RD0-RD3: usati come output (LEDs)
+                      00113     setRegK TRISD, 0xF0
+0048   30F0               M                 movlw 0xF0
+0049   1683 1303          M                 banksel TRISD
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+004B   0088               M                 movwf TRISD
+                      00114     setReg0 PORTD
+004C   1283 1303          M                 banksel PORTD
+004E   0188               M                 clrf PORTD
+004F   0008           00115     return
+                      00116     
+0050                  00117 delay
+                      00118     ; Ritardo tramite timer1
+                      00119     ; input:
+                      00120     ;   W = valore iniziale per TMR1H (TMR1L viene posto = 0)
+                      00121     ;
+                      00122     ; Utilizzo del timer in polling
+0050   1283 1303      00123     banksel TMR1H
+0052   018E           00124     clrf TMR1L           ; TMR1L = 0
+0053   008F           00125     movwf TMR1H          ; TMR1H = W
+0054   1283 1303      00126     banksel PIR1
+0056   100C           00127     bcf PIR1,TMR1IF      ; azzeramento flag di overflow
+                      00128 
+0057   1C0C           00129     btfss PIR1,TMR1IF    ; se overflow del timer -> salta goto
+0058   2???           00130         goto $-1      ; ripetizione loop di attesa
+0059   0008           00131     return
+                      00132     
+005A                  00133 beep1s
+005A   1283 1303      00134     banksel T2CON
+005C   1512           00135     bsf T2CON,2                 ;accendi timer2 per suonare il buzzer
+005D   3080           00136     movlw 0x80                  ;carica W con 32768 per fare un delay di 1s
+005E   ???? ????      00137     pagesel delay
+0060   2???           00138     call delay                  ;delay 1s
+0061   1283 1303      00139     banksel T2CON
+0063   1112           00140     bcf T2CON,2                 ;spegni il timer2
+0064   0008           00141     return
+                      00142     
+2FF4 3EFF             00143     END
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  5
 
 
 SYMBOL TABLE
@@ -133,7 +286,7 @@ BRG6                              00000006
 BRG7                              00000007
 BRG8                              00000000
 BRG9                              00000001
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  4
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  6
 
 
 SYMBOL TABLE
@@ -192,7 +345,7 @@ CHS0                              00000002
 CHS1                              00000003
 CHS2                              00000004
 CHS3                              00000005
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  5
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  7
 
 
 SYMBOL TABLE
@@ -251,7 +404,7 @@ INTF                              00000001
 IOCB                              00000096
 IOCB0                             00000000
 IOCB1                             00000001
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  6
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  8
 
 
 SYMBOL TABLE
@@ -267,7 +420,6 @@ IRCF0                             00000004
 IRCF1                             00000005
 IRCF2                             00000006
 IRP                               00000007
-IRQ                               00000000
 LTS                               00000001
 MC1OUT                            00000007
 MC2OUT                            00000006
@@ -310,13 +462,13 @@ PCON                              0000008E
 PDC0                              00000000
 PDC1                              00000001
 PDC2                              00000002
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  7
+PDC3                              00000003
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE  9
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-PDC3                              00000003
 PDC4                              00000004
 PDC5                              00000005
 PDC6                              00000006
@@ -369,13 +521,13 @@ RC1                               00000001
 RC2                               00000002
 RC3                               00000003
 RC4                               00000004
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  8
+RC5                               00000005
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 10
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-RC5                               00000005
 RC6                               00000006
 RC7                               00000007
 RC8_9                             00000006
@@ -428,13 +580,13 @@ SSPCON                            00000014
 SSPCON2                           00000091
 SSPEN                             00000005
 SSPIE                             00000003
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE  9
+SSPIF                             00000003
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 11
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-SSPIF                             00000003
 SSPM0                             00000000
 SSPM1                             00000001
 SSPM2                             00000002
@@ -442,7 +594,6 @@ SSPM3                             00000003
 SSPMSK                            00000093
 SSPOV                             00000006
 SSPSTAT                           00000094
-START                             00000001
 STATUS                            00000003
 STRA                              00000000
 STRB                              00000001
@@ -487,14 +638,14 @@ TOUTPS1                           00000004
 TOUTPS2                           00000005
 TOUTPS3                           00000006
 TRISA                             00000085
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 10
+TRISA0                            00000000
+TRISA1                            00000001
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 12
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-TRISA0                            00000000
-TRISA1                            00000001
 TRISA2                            00000002
 TRISA3                            00000003
 TRISA4                            00000004
@@ -546,14 +697,14 @@ TXD8                              00000000
 TXEN                              00000005
 TXIE                              00000004
 TXIF                              00000004
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 11
+TXREG                             00000019
+TXSTA                             00000098
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 13
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-TXREG                             00000019
-TXSTA                             00000098
 UA                                00000001
 ULPWUE                            00000005
 ULPWUIE                           00000002
@@ -605,14 +756,14 @@ _BOR_SBODEN                       00003DFF
 _CONFIG1                          00002007
 _CONFIG2                          00002008
 _CPD_OFF                          00003FFF
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 12
+_CPD_ON                           00003F7F
+_CP_OFF                           00003FFF
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 14
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-_CPD_ON                           00003F7F
-_CP_OFF                           00003FFF
 _CP_ON                            00003FBF
 _DEBUG_OFF                        00003FFF
 _DEBUG_ON                         00001FFF
@@ -660,16 +811,27 @@ _WRT_HALF                         000039FF
 _WRT_OFF                          00003FFF
 _XT_OSC                           00003FF9
 __16F887                          00000001
-sleep_pnt                         00000017
+_main_prog_000C                   0000000C
+_main_prog_0058                   00000058
+beep1s                            0000005A
+delay                             00000050
+initHw                            00000022
+irq                               00000000
+MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-17-2016  12:58:13         PAGE 15
 
-MPASM 5.68  /USERS/ENRICO/GIT/PIC16-SERIAL/P   9-14-2016  0:57:18         PAGE 13
 
+SYMBOL TABLE
+  LABEL                             VALUE 
 
-
-
+loop                              00000006
+secondi                           00000000
+setReg0                           
+setRegK                           
+start                             00000001
+suono                             0000001E
 
 Errors   :     0
 Warnings :     0 reported,     0 suppressed
-Messages :     5 reported,     0 suppressed
+Messages :     8 reported,     0 suppressed
 
 
