@@ -1,5 +1,5 @@
 MPLINK 5.08, LINKER
-Linker Map File - Created Tue Oct 04 22:44:09 2016
+Linker Map File - Created Thu Dec 15 10:06:20 2016
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -24,45 +24,45 @@ Linker Map File - Created Tue Oct 04 22:44:09 2016
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                      IRQ   0x000005    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                    START   0x00008e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                beep_loop   0x00007f    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-          beep_loop_begin   0x000082    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-            beep_loop_end   0x000089    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 delay_ms   0x00005a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-               inner_loop   0x000060    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-          inner_loop_init   0x00005e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 is_digit   0x000048    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     loop   0x00005b    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                main_loop   0x00006a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     nops   0x000063    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-              not_a_digit   0x000057    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                    setup   0x000010    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                  Counter   0x000072       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 ReadChar   0x000070       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     Temp   0x000071       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                      IRQ   0x000005    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                    START   0x00008e    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                beep_loop   0x00007f    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+          beep_loop_begin   0x000082    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+            beep_loop_end   0x000089    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 delay_ms   0x00005a    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+               inner_loop   0x000060    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+          inner_loop_init   0x00005e    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 is_digit   0x000048    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     loop   0x00005b    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                main_loop   0x00006a    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     nops   0x000063    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+              not_a_digit   0x000057    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                    setup   0x000010    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                  Counter   0x000072       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 ReadChar   0x000070       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     Temp   0x000071       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
 
 
 
                               Symbols - Sorted by Address
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                      IRQ   0x000005    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                    setup   0x000010    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 is_digit   0x000048    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-              not_a_digit   0x000057    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 delay_ms   0x00005a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     loop   0x00005b    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-          inner_loop_init   0x00005e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-               inner_loop   0x000060    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     nops   0x000063    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                main_loop   0x00006a    program     extern C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                beep_loop   0x00007f    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-          beep_loop_begin   0x000082    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-            beep_loop_end   0x000089    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                    START   0x00008e    program     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                 ReadChar   0x000070       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                     Temp   0x000071       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
-                  Counter   0x000072       data     static C:\Users\Matteo\git\pic16-serial\pic16-serial.X\main.asm
+                      IRQ   0x000005    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                    setup   0x000010    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 is_digit   0x000048    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+              not_a_digit   0x000057    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 delay_ms   0x00005a    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     loop   0x00005b    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+          inner_loop_init   0x00005e    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+               inner_loop   0x000060    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     nops   0x000063    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                main_loop   0x00006a    program     extern /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                beep_loop   0x00007f    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+          beep_loop_begin   0x000082    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+            beep_loop_end   0x000089    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                    START   0x00008e    program     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                 ReadChar   0x000070       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                     Temp   0x000071       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
+                  Counter   0x000072       data     static /home/matteo/Scrivania/pic16-serial/pic16-serial.X/main.asm
 
 

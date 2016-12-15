@@ -1,8 +1,5 @@
 #include <p16f887.inc>
     LIST p=16f887
-    
-; Configurazione microcontrollore
-;    __CONFIG _WDT_OFF
 
 RES_VECT CODE 0x0000		; processor reset vector
     GOTO START			; go to beginning of program
@@ -29,8 +26,6 @@ IRQ
     banksel PIR1
     bcf PIR1, TMR2IF
     retfie
-    
-    
     
 ;Setup I/O e EUSART
     global setup
@@ -61,7 +56,7 @@ setup
     banksel TMR2
     clrf TMR2			;azzera contatore
     banksel PR2
-    movlw 0x83
+    movlw D'142'
     movwf PR2			;compara contatore con 142
     banksel PIE1
     bsf PIE1, TMR2IE		;abilita interrupt 
